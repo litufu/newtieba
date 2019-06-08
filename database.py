@@ -15,13 +15,13 @@ class Bar(Base):
     kind = Column(String)
     hassend = Column(Boolean)
 
-#
+
 # # 代理
-# class Proxy(Base):
-#     __tablename__ = 'proxy'
-#     id = Column(Integer, primary_key=True)
-#     ip = Column(String)
-#     occupy = Column(Boolean)
+class Proxy(Base):
+    __tablename__ = 'proxy'
+    id = Column(Integer, primary_key=True)
+    ip = Column(String)
+    occupy = Column(Boolean)
 
 
 
