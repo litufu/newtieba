@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from urllib.parse import quote
@@ -23,7 +25,7 @@ session = DBSession()
 chrome_options = Options()
 chrome_options.add_argument(
     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36')
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(
@@ -61,12 +63,14 @@ def get_all_ba_name(first_class):
 def get_bar():
     # 获取高中和大学吧,从百度贴吧获取
     for barName in get_all_ba_name('高等院校'):
+        print(barName)
         b = Bar(name=barName, kind="daxue", hassend=False)
         session.add(b)
         session.commit()
 
     for barName in get_all_ba_name('中小学'):
         if '高' in barName or '中' in barName:
+            print(barName)
             b = Bar(name=barName, kind="gaozhong", hassend=False)
             session.add(b)
             session.commit()
@@ -91,14 +95,17 @@ def get_school():
             session.commit()
 
 
-def get_tie(bar_name, kw, pn):
-    driver.get(url='http://tieba.baidu.com/f?kw={}&ie=utf-8&pn={}'.format(bar_name, pn))
+def get_tie(bar_name, kw):
+    url = 'http://tieba.baidu.com/f?kw={}'.format(bar_name)
+    print(url)
+    driver.get(url=url)
     time.sleep(3)
     save_tie(bar_name, kw)
-    driver.close()
+    #driver.close()
 
 
 def save_tie(bar_name,kw):
+    print('{}kaishi'.format(bar_name))
     links = driver.find_element_by_id('thread_list').find_elements_by_partial_link_text(kw)
     if len(links) == 0:
         print('没有找到相关{}链接'.format(kw))
@@ -143,17 +150,13 @@ def get_ties():
     try:
         gaozhongs = session.query(Bar).filter(Bar.kind =="gaozhong").all()
         for gaozhong in gaozhongs:
-            for i in range(4):
-                pn = i * 50
-                get_tie(gaozhong.name, '高考', pn)
+            get_tie(gaozhong.name, '高考')
 
         daxues = session.query(Bar).filter(Bar.kind =="daxue").all()
         for daxue in daxues:
-            for i in range(4):
-                pn = i * 50
-                get_tie(daxue.name, '报考', pn)
+            get_tie(daxue.name, '报考')
     except Exception as e:
-        print(e)
+        print(e.__traceback__)
         get_ties()
 
 
@@ -161,5 +164,6 @@ def get_ties():
 
 
 if __name__ == '__main__':
+    get_bar()
     get_ties()
 
